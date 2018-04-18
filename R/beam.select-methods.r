@@ -282,9 +282,13 @@ setMethod(
       marg <- object@marginal
       edges <- .Idx2RowCol(as.numeric(rownames(marg))) # dataframe with all edges
       colnames(edges) <- c('node1','node2')
-      vertices = data.frame(id = 1:object@dimX[2], label = object@varlabs)
+      if(length(object@varlabs)>0){
+        vertices <- data.frame(id = 1:object@dimX[2], label = object@varlabs)
+      }else{
+        vertices <- data.frame(id = 1:object@dimX[2], label = as.character(1:object@dimX[2]))
+      }
       myigraph <- igraph::graph_from_data_frame(d=edges, vertices=vertices, directed=FALSE)
-      if(!is.null(object@varlabs)){
+      if(length(object@varlabs)>0){
         myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
       }
       return(myigraph)
@@ -304,9 +308,13 @@ setMethod(
       cond <- object@conditional
       edges <- .Idx2RowCol(as.numeric(rownames(cond)))
       colnames(edges) <- c('node1','node2')
-      vertices = data.frame(id = 1:object@dimX[2], label = object@varlabs)
+      if(length(object@varlabs)>0){
+        vertices <- data.frame(id = 1:object@dimX[2], label = object@varlabs)
+      }else{
+        vertices <- data.frame(id = 1:object@dimX[2], label = as.character(1:object@dimX[2]))
+      }
       myigraph <- igraph::graph_from_data_frame(d=edges, vertices=vertices, directed=FALSE)
-      if(!is.null(object@varlabs)){
+      if(length(object@varlabs)>0){
         myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
       }
       return(myigraph)

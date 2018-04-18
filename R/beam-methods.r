@@ -302,7 +302,7 @@ setMethod(
       edges <- cbind(edges, abs(df$m_cor))
       colnames(edges) <- c('node1','node2','weight')
       myigraph <- igraph::graph_from_data_frame(d=edges, directed=FALSE)
-      if(!is.null(object@varlabs)){
+      if(length(object@varlabs)>0){
         myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
       }
       return(myigraph)
@@ -326,7 +326,7 @@ setMethod(
       edges <- cbind(edges, abs(df$p_cor))
       colnames(edges) <- c('node1','node2','weight')
       myigraph <- igraph::graph_from_data_frame(d=edges, directed=FALSE)
-      if(!is.null(object@varlabs)){
+      if(length(object@varlabs)>0){
         myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
       }
       return(myigraph)

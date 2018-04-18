@@ -1,10 +1,10 @@
-5357e743121034fde00fd0b6269a7ca9 *DESCRIPTION
+dd776c84a5110be0a4d3267bf9fd7121 *DESCRIPTION
 02cf7640d331ba2a2ff61ad5270011ca *NAMESPACE
 a3663c649cad898255939021dbbbb8e8 *R/AllClasses.r
 a0a601b7ae0f3a3a748f1239e5a37fe9 *R/AllGenerics.r
-ecf25a82ff751858ce01b22cfa483631 *R/beam-methods.r
+3dd067a393419d5f3dcf5f40014694b2 *R/beam-methods.r
 781c120a7b0516d6875797f3f5bc4eff *R/beam.r
-962b10653ff5f8489dc85bdfa6512319 *R/beam.select-methods.r
+e1046f0e06f4a2ee4820d030d1cb8913 *R/beam.select-methods.r
 57757943c02c94d70d6cc6889e952b18 *R/beam.select.r
 3f5f6a3534207ff17b7b07814858951f *R/zzz.r
 9fecb8da80cc5f42cee56f575704a2ab *data/TCPAprad.RData
