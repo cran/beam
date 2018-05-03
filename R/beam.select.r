@@ -3,18 +3,16 @@
 #' @param object An object of class \code{\link{beam-class}}.
 #' @param thres numeric. Significance threshold to be applied on adjusted tail probabilities.
 #' @param method character. Method to use for multiple comparison adjustment of tail probabilities.
-#' @param p0 numeric. Prior probability on the number of null hypotheses.
 #' @param return.only character. Quantities to be returned.
 #'
 #' @details
 #'
 #' The argument \code{method} allows to adjust the tail probabilities obtained from the null distributions of
-#' the Bayes factors for multiple comparisons. Possible choices are: "holm", "bonferroni", "BH", "BY", "HC",
-#' "blfdr" and "BFDR". Apart from "HC", "blfdr" and "BFDR", these are passed onto the R function \code{p.adjust}
+#' the Bayes factors for multiple comparisons. Possible choices are: "holm", "bonferroni", "BH", "BY" and "HC".
+#' Apart from "HC", these are passed onto the R function \code{p.adjust}
 #' from package \pkg{stats} and we refer the user to its documentation for details. The method "HC" provides an
 #' optimal decision threshold based on the Higher Criticism score which is computed using the R function \code{hc.thresh}
-#' from package \pkg{fdrtool}. Again, we refer to the associated documentation for details. Methods "blfdr" and "BFDR"
-#' only work when a prior probability on the number of null hypotheses is specified via argument \code{p0}.
+#' from package \pkg{fdrtool}. Again, we refer to the associated documentation for details.
 #'
 #' The argument \code{return.only} allows to decide which quantities have to be in the output:
 #' it could be any subvector of c('cor', 'BF', 'prob', 'adj')
@@ -29,7 +27,7 @@
 #' @references Leday, G.G.R. and Richardson, S. (2018). Fast Bayesian inference in large Gaussian graphical models. Submitted.
 #'
 #' @export
-beam.select <- function(object, thres = 0.1, method = "BH", p0=NULL, return.only = c(object@return.only,'adj')){
+beam.select <- function(object, thres = 0.1, method = "BH", return.only = c(object@return.only,'adj')){
 
   ###########################################
   #              PREPROCESSING              #
@@ -45,30 +43,12 @@ beam.select <- function(object, thres = 0.1, method = "BH", p0=NULL, return.only
   }
   if(!is.null(method)){
     if(is.character(method)){
-      if(!method%in%c("holm", "bonferroni", "BH", "BY", "HC", "blfdr", "BFDR")){
+      if(!method%in%c("holm", "bonferroni", "BH", "BY", "HC")){
         stop("method is not recognized")
       }
     }else{
       stop("method must be a character")
     }
-  }
-  if(!is.null(p0)){
-    if(!is.numeric(p0)){
-      stop("p0 must be a numeric")
-    }else{
-      if((p0<=0) | (p0>=1)){
-        stop("p0 must be greater than 0 and lower than 1")
-      }
-    }
-  }
-
-  if(!is.null(p0) && !(method %in% c("blfdr", "BFDR"))){
-    warning("Method ", method, " does not require p0 specification. This argument will be therefore ignored")
-    p0 = NULL
-  }
-
-  if(method %in% c("blfdr", "BFDR") && is.null(p0)){
-    stop("Method ", method, " does require p0 specification (no default provided)")
   }
 
   if(is.character(return.only)){
@@ -125,54 +105,26 @@ beam.select <- function(object, thres = 0.1, method = "BH", p0=NULL, return.only
       tableM <- df[marg.cols] # without comma to preserve the data.frame structure even if one single column is selected
     }
 
-    if(!is.null(p0)){
+    if(!('m_tail_prob' %in% df.cols)){
+      stop('Method ', method, ' requires tail probabilities, which are not currently included in the beam object')
+    }
 
-      if(!('m_logBF' %in% df.cols)){
-        stop('Method ', method, ' requires Bayes Factors, which are not currently included in the beam object')
-      }
+    if(method=="HC"){
 
-      blfdrsvec <- p0/(exp(df$m_logBF)*(1-p0)+p0)
-
-      if(method=="blfdr"){
-        if('adj' %in% return.only){  # put values in column if requested in output
-          tableM[, ncol(tableM)] <- blfdrsvec
-        }
-
-        tableM <- tableM[blfdrsvec < thres, , drop = FALSE] # filter columns
-
-      }else{ # method == "BFDR"
-
-        allthr <- sort(blfdrsvec, index.return=TRUE)
-        BFDRsvec <- rep(0,length(allthr$x))
-        BFDRsvec[allthr$ix] <- cumsum(allthr$x)/(1:length(allthr$x))
-        if('adj' %in% return.only){
-          tableM[, ncol(tableM)] <- BFDRsvec
-        }
-        tableM <- tableM[BFDRsvec < thres, , drop = FALSE] # filter columns
-      }
-    }else{
-      if(!('m_tail_prob' %in% df.cols)){
-        stop('Method ', method, ' requires tail probabilities, which are not currently included in the beam object')
-      }
-
-      if(method=="HC"){
-
-        HCthres <- hc.thresh(df$m_tail_prob, alpha0=1, plot=FALSE)
-        if('adj' %in% return.only){
-          tableM <- tableM[df$m_tail_prob < HCthres, -ncol(tableM)]
-        }else{
-          tableM <- tableM[df$m_tail_prob < HCthres, , drop = FALSE ]
-        }
-
+      HCthres <- hc.thresh(df$m_tail_prob, alpha0=1, plot=FALSE)
+      if('adj' %in% return.only){
+        tableM <- tableM[df$m_tail_prob < HCthres, -ncol(tableM)]
       }else{
-
-        tailAdj <- p.adjust(df$m_tail_prob, method=method)
-        if('adj' %in% return.only){
-          tableM[, ncol(tableM)] <- tailAdj
-        }
-        tableM <- tableM[tailAdj<thres,  , drop = FALSE]
-
+        tableM <- tableM[df$m_tail_prob < HCthres, , drop = FALSE ]
       }
+
+    }else{
+
+      tailAdj <- p.adjust(df$m_tail_prob, method=method)
+      if('adj' %in% return.only){
+        tableM[, ncol(tableM)] <- tailAdj
+      }
+      tableM <- tableM[tailAdj<thres,  , drop = FALSE]
 
     }
 
@@ -209,57 +161,26 @@ beam.select <- function(object, thres = 0.1, method = "BH", p0=NULL, return.only
       tableC <- df[cond.cols]
     }
 
-    if(!is.null(p0)){
-      if(!('p_logBF' %in% df.cols)){
-        stop('Method ', method, 'requires Bayes Factors, which are not currently included in the beam object')
-      }
+    if(!('p_tail_prob' %in% df.cols)){
+      stop('Method ', method, 'requires tail probabilities, which are not currently included in the beam object')
+    }
 
-      blfdrsvec <- p0/(exp(df$p_logBF)*(1-p0)+p0)
+    if(method=="HC"){
 
-      if(method=="blfdr"){
-
-        if('adj' %in% return.only){  # put values in column if requested in output
-          tableC[, ncol(tableC)] <- blfdrsvec
-        }
-
-        tableC <- tableC[blfdrsvec < thres,  , drop = FALSE] # filter columns
-
+      HCthres <- hc.thresh(df$p_tail_prob, alpha0=1, plot=FALSE)
+      if('adj' %in% return.only){  # put values in column if requested in output
+        tableC <- tableC[df$p_tail_prob < HCthres, -ncol(tableC)]
       }else{
-
-        allthr <- sort(blfdrsvec, index.return=TRUE)
-        BFDRsvec <- rep(0,length(allthr$x))
-        BFDRsvec[allthr$ix] <- cumsum(allthr$x)/(1:length(allthr$x))
-        if('adj' %in% return.only){  # put values in column if requested in output
-          tableC[, ncol(tableC)] <- BFDRsvec
-        }
-        tableC <- tableC[BFDRsvec<thres,  , drop = FALSE]
-
+        tableC <- tableC[df$p_tail_prob < HCthres,  , drop = FALSE]
       }
 
     }else{
 
-      if(!('p_tail_prob' %in% df.cols)){
-        stop('Method ', method, 'requires tail probabilities, which are not currently included in the beam object')
+      tailAdj <- p.adjust(df$p_tail_prob, method=method)
+      if('adj' %in% return.only){  # put values in column if requested in output
+        tableC[, ncol(tableC)] <- tailAdj
       }
-
-      if(method=="HC"){
-
-        HCthres <- hc.thresh(df$p_tail_prob, alpha0=1, plot=FALSE)
-        if('adj' %in% return.only){  # put values in column if requested in output
-          tableC <- tableC[df$p_tail_prob < HCthres, -ncol(tableC)]
-        }else{
-          tableC <- tableC[df$p_tail_prob < HCthres,  , drop = FALSE]
-        }
-
-      }else{
-
-        tailAdj <- p.adjust(df$p_tail_prob, method=method)
-        if('adj' %in% return.only){  # put values in column if requested in output
-          tableC[, ncol(tableC)] <- tailAdj
-        }
-        tableC <- tableC[tailAdj<thres,  , drop = FALSE]
-
-      }
+      tableC <- tableC[tailAdj<thres,  , drop = FALSE]
 
     }
 

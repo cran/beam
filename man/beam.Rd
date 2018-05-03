@@ -1,7 +1,7 @@
 \name{beam}
 \alias{beam}
 
-\title{Bayesian inference for high-dimensional Gaussian graphical models}
+\title{Bayesian inference in large Gaussian graphical models}
 
 \usage{
 beam(X, type = "conditional", return.only = c("cor", "BF", "prob"), verbose=TRUE)
@@ -24,11 +24,11 @@ This function carries out covariance and inverse covariance estimation within th
 
 \details{
 The arguments \code{type} and \code{return.only} have essentially been introduced for computational and memory savings.
-Using argument \code{type} the user may indicate whether the marginal dependencies ("marginal"), the conditional dependencies ("conditional") or both ("both") are to be inferred. On the other hand, the argument \code{return.only} is used to indicate whether the correlations ("cor"), Bayes factors ("BF") or tail probabilities ("prob") should be returned. Default is to return all three quantities both for marginal and conditional dependencies.
+Using argument \code{type} the user may indicate whether the marginal dependencies ("marginal"), the conditional dependencies ("conditional") or both ("both") are to be inferred. On the other hand, the argument \code{return.only} is used to indicate whether the correlations ("cor"), Bayes factors ("BF") or tail probabilities ("prob") should be returned. Default is to return all three quantities for conditional dependencies.
 }
 
 \references{
-Leday, G.G.R. and Richardson, S. (2018). Fast Bayesian inference in large Gaussian graphical models. Submitted.
+Leday, G.G.R. and Richardson, S. (2018). Fast Bayesian inference in large Gaussian graphical models. <arXiv:1803.08155>.
 }
 
 \author{
