@@ -9,7 +9,7 @@
 #'
 #' @description An S4 class representing the output of the \code{\link{beam}} function.
 #'
-#' @slot table data.frame. A data.frame containing marginal and/or partial correlation estimates, Bayes factors and tail probabilities for each edge.
+#' @slot table matrix. A data.frame containing marginal and/or partial correlation estimates, Bayes factors and tail probabilities for each edge.
 #' @slot deltaOpt numeric. Empirical Bayes estimate of hyperpaprameter delta.
 #' @slot alphaOpt numeric. Empirical Bayes estimate of hyperpaprameter alpha.
 #' @slot dimX numeric. Dimension of the input data matrix X.
@@ -19,6 +19,8 @@
 #' @slot valOpt numeric. Maximum value of the log-marginal likelihood of the Gaussian conjugate model.
 #' @slot return.only character. Input argument.
 #' @slot time numeric. Running time (in seconds).
+#' @slot TinvStdev numeric. Square root of partial variances.
+#' @slot s numeric. Sample variances.
 #'
 #' @method
 #'  \item{print}{Print the object information}
@@ -36,7 +38,7 @@
 #' @author Gwenael G.R. Leday and Ilaria Speranza
 #'
 setClass("beam",
-         representation(table = "data.frame",
+         representation(table = "matrix",
                         deltaOpt = "numeric",
                         alphaOpt = "numeric",
                         dimX = "numeric",
@@ -45,7 +47,9 @@ setClass("beam",
                         gridAlpha = "matrix",
                         valOpt = "numeric",
                         return.only = "character",
-                        time = "numeric")
+                        time = "numeric",
+                        TinvStdev = "numeric",
+                        s = "numeric")
 )
 
 #' @name beam.select-class

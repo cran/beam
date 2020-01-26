@@ -1,8 +1,8 @@
 Package: beam
 Type: Package
 Title: Fast Bayesian Inference in Large Gaussian Graphical Models
-Version: 1.0.2
-Date: 2018-05-03
+Version: 2.0.0
+Date: 2020-01-16
 Author: Gwenael G.R. Leday [cre, aut],
   Ilaria Speranza [aut],
   Harry Gray [ctb]
@@ -10,13 +10,16 @@ Authors@R: c(person("Gwenael G.R.","Leday", role=c("cre", "aut"), email="gwenael
 Maintainer: Gwenael G.R. Leday <gwenael.leday@mrc-bsu.cam.ac.uk>
 Depends: R (>= 3.1.0)
 Imports: stats, methods, grDevices, graphics, Matrix, fdrtool, igraph,
-        knitr
-Description: Fast Bayesian inference of marginal and conditional independence structures between variables from high-dimensional data (Leday and Richardson (2018) <arXiv:1803.08155>).
+        knitr, Rcpp, assertthat
+Description: Fast Bayesian inference of marginal and conditional independence structures from high-dimensional data.
 LazyLoad: yes
 License: GPL (>= 2.0)
 LazyData: TRUE
 NeedsCompilation: yes
 Repository: CRAN
-Packaged: 2018-05-03 13:59:32 UTC; gwenael
+Packaged: 2020-01-16 11:09:50 UTC; leday001
 RoxygenNote: 6.0.1
-Date/Publication: 2018-05-03 14:16:30 UTC
+LinkingTo: Rcpp, RcppArmadillo, BH
+Suggests: covr, testthat
+URL: https://github.com/gleday/beam
+Date/Publication: 2020-01-26 22:10:02 UTC

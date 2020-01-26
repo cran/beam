@@ -44,13 +44,13 @@ setMethod(
       cat("+ SUMMARY MARGINAL DEPENDENCIES")
       smry <- NULL
       if("m_cor" %in% labs){
-        smry <- rbind(smry, format(round(quantile(object@table$m_cor, probs=c(0,0.5,1)), 3), nsmall=3))
+        smry <- rbind(smry, format(round(quantile(object@table[,"m_cor"], probs=c(0,0.5,1)), 3), nsmall=3))
       }
       if("m_logBF" %in% labs){
-        smry <- rbind(smry, format(round(quantile(object@table$m_logBF, probs=c(0,0.5,1)), 3), nsmall=3))
+        smry <- rbind(smry, format(round(quantile(object@table[,"m_logBF"], probs=c(0,0.5,1)), 3), nsmall=3))
       }
       if("m_tail_prob" %in% labs){
-        smry <- rbind(smry, format(quantile(object@table$m_tail_prob, probs=c(0,0.5,1)), digits=3))
+        smry <- rbind(smry, format(quantile(object@table[,"m_tail_prob"], probs=c(0,0.5,1)), digits=3))
       }
       rownames(smry) <- c(" marginal correlations ", " log(Bayes factors)", "tail probabilities")[c("m_cor", "m_logBF", "m_tail_prob")%in%labs]
       colnames(smry) <- c("Min.", "Median", "Max.")
@@ -61,13 +61,13 @@ setMethod(
       cat("+ SUMMARY CONDITIONAL DEPENDENCIES")
       smry <- NULL
       if("p_cor"%in%labs){
-        smry <- rbind(smry, format(round(quantile(object@table$p_cor, probs=c(0,0.5,1)), 3), nsmall=3))
+        smry <- rbind(smry, format(round(quantile(object@table[,"p_cor"], probs=c(0,0.5,1)), 3), nsmall=3))
       }
       if("p_logBF"%in%labs){
-        smry <- rbind(smry, format(round(quantile(object@table$p_logBF, probs=c(0,0.5,1)), 3), nsmall=3))
+        smry <- rbind(smry, format(round(quantile(object@table[,"p_logBF"], probs=c(0,0.5,1)), 3), nsmall=3))
       }
       if("p_tail_prob"%in%labs){
-        smry <- rbind(smry, format(quantile(object@table$p_tail_prob, probs=c(0,0.5,1)), digits=3))
+        smry <- rbind(smry, format(quantile(object@table[,"p_tail_prob"], probs=c(0,0.5,1)), digits=3))
       }
       rownames(smry) <- c(" partial correlations ", " log(Bayes factors)", "tail probabilities")[c("p_cor", "p_logBF", "p_tail_prob")%in%labs]
       colnames(smry) <- c("Min.", "Median", "Max.")
@@ -85,16 +85,17 @@ setMethod(
   f = "marg",
   signature = "beam",
   definition = function(object){
-    if(object@type == 'conditional'){
-      warning('No information about marginal dependence structure available. Check "type" argument in beam call')
-      return(data.frame())
-    }
+    
+    # Check input
+    assert_that(object@type != 'conditional', msg="no information available in input beam object")
+    
+    # Extract table
     matidxs <- .upperTriIdxs(object@dimX[2])
     rowcol <- data.frame(row = matidxs[,1], col = matidxs[,2])
     df <- object@table
     marg_cols <- c('m_cor','m_logBF','m_tail_prob')
-
-    return(cbind(rowcol,df[intersect(marg_cols, colnames(df))]))
+    df <- df[, intersect(marg_cols, colnames(df))]
+    return(cbind(rowcol,df))
   }
 )
 
@@ -105,15 +106,18 @@ setMethod(
   f = "cond",
   signature = "beam",
   definition = function(object){
-    if(object@type == 'marginal'){
-      warning('No information about condtional dependence structure available. Check "type" argument in beam call')
-      return(data.frame())
-    }
+    
+    # Check input
+    assert_that(object@type != 'marginal', msg="no information available in input beam object")
+    
+    # Extract table
     df <- object@table
     matidxs <- .upperTriIdxs(object@dimX[2])
     rowcol <- data.frame(row = matidxs[,1], col = matidxs[,2])
     cond_cols <- c('p_cor','p_logBF','p_tail_prob')
-    return(cbind(rowcol,df[intersect(cond_cols, colnames(df))]))
+    df <- df[,intersect(cond_cols, colnames(df))]
+    
+    return(cbind(rowcol,df))
   }
 )
 
@@ -124,16 +128,17 @@ setMethod(
   f = "mcor",
   signature = "beam",
   definition = function(object){
-    df <- object@table
+    
+    # Check input
+    assert_that('m_cor' %in% colnames(object@table), msg="'m_cor' not available in input beam object")
+    
+    # Extract marginal correlation matrix
     p <- object@dimX[2]
     idxs <- .upperTriIdxs(p)
-    if('m_cor' %in% colnames(df)){
-      matcor <- as.matrix(Matrix::sparseMatrix(i=c(idxs[,1],idxs[,2]), j=c(idxs[,2],idxs[,1]), x=rep(df$m_cor,2), dims=c(p,p)))
-      diag(matcor) <- 1
-      return(matcor)
-    }else{
-      stop('Method not available: either "cor" is not included in return.only or type = "marginal" in calling function beam')
-    }
+    matcor <- as.matrix(Matrix::sparseMatrix(i=c(idxs[,1],idxs[,2]), j=c(idxs[,2],idxs[,1]), x=rep(object@table[,"m_cor"],2), dims=c(p,p)))
+    diag(matcor) <- 1
+    
+    return(matcor)
   }
 )
 
@@ -144,17 +149,79 @@ setMethod(
   f = "pcor",
   signature = "beam",
   definition = function(object){
-    df <- object@table
+    
+    # Check input
+    assert_that('p_cor' %in% colnames(object@table), msg="'p_cor' not available in input beam object")
+    
+    # Extract partial correlation matrix
     p <- object@dimX[2]
     idxs <- .upperTriIdxs(p)
-    if('p_cor' %in% colnames(df)){
-      matpcor <- as.matrix(Matrix::sparseMatrix(i=c(idxs[,1],idxs[,2]), j=c(idxs[,2],idxs[,1]), x=rep(df$p_cor,2), dims=c(p, p)))
-      diag(matpcor) <- 1
-      return(matpcor)
-    }else{
-      stop('Method not available: either "cor" is not included in return.only or type = "marginal" in calling function beam')
-    }
+    matpcor <- as.matrix(Matrix::sparseMatrix(i=c(idxs[,1],idxs[,2]), j=c(idxs[,2],idxs[,1]), x=rep(object@table[, "p_cor"],2), dims=c(p, p)))
+    diag(matpcor) <- 1
+    
+    return(matpcor)
+  }
+)
 
+#' @rdname beam-class
+#' @aliases postExpSigma
+#' @param object An object of class \code{beam-class}
+#' @param vars.method method of shrinkage estimation for variances 
+setMethod(
+  f = "postExpSigma",
+  signature = "beam",
+  definition = function(object, vars.method="eb"){
+    
+    # Check input
+    assert_that('m_cor' %in% colnames(object@table), msg="'m_cor' not available in input beam object")
+    assert_that(is.character(vars.method))
+    assert_that(length(vars.method)==1, msg="vars.method must be of length 1")
+    assert_that(vars.method %in% c("eb", "mean", "median", "none", "scaled"), msg="unkown vars.method")
+    
+    # Posterior expectation
+    covmat <- mcor(object)
+    
+    # Rescale or not
+    if(vars.method != "scaled"){
+      s2 <- .shrinkvars(object@s, object@dimX[1], method=vars.method)
+      covmat <- covmat * tcrossprod(sqrt(s2))
+    }
+    
+    return(covmat)
+  }
+)
+
+
+#' @rdname beam-class
+#' @aliases postExpOmega
+#' @param object An object of class \code{beam-class}
+#' @param vars.method method of shrinkage estimation for variances 
+setMethod(
+  f = "postExpOmega",
+  signature = "beam",
+  definition = function(object, vars.method="eb"){
+
+    # Check input
+    assert_that('p_cor' %in% colnames(object@table), msg="'p_cor' not available in input beam object")
+    assert_that(is.character(vars.method))
+    assert_that(length(vars.method)==1, msg="vars.method must be of length 1")
+    assert_that(vars.method %in% c("eb", "mean", "median", "none", "scaled"), msg="unkown vars.method")
+    
+    # Posterior expectation
+    icovmat <- - pcor(object)
+    diag(icovmat) <- 1
+    icovmat <- icovmat * tcrossprod(object@TinvStdev)
+    icovmat <- (object@dimX[1] + object@deltaOpt) * icovmat
+    
+    # Rescale or not
+    if(vars.method != "scaled"){
+
+      s2 <- .shrinkvars(object@s, object@dimX[1], method=vars.method)
+      icovmat <- icovmat * tcrossprod(1/sqrt(s2))
+      
+    }
+    
+    return(icovmat)
   }
 )
 
@@ -164,7 +231,7 @@ setMethod(
   f = "plotML",
   signature = "beam",
   definition = function(object, ...){
-    plot(object@gridAlpha[,2], object@gridAlpha[,3], type="l", xlab=expression(alpha), ylab="log-marginal likelihood")
+    plot(object@gridAlpha[,2], object@gridAlpha[,3], type="l", xlab=expression(alpha), ylab="log-marginal likelihood", lwd=2, ...)
     abline(v=object@alphaOpt, col="black", lty=2)
     abline(h=object@valOpt, col="black", lty=2)
   }
@@ -280,9 +347,9 @@ setMethod(
         
         # Plot
         par(mar=c(2, 2, 2, 2) + 0.1)
-        image(1:nrow(themat), 1:ncol(themat), mirror(themat), zlim=c(-1,1), col=rg, xlab="", ylab="", main="", xaxt="n", yaxt="n")
-        #image(1:nrow(themat), 1:ncol(themat), mirror(themat), zlim=c(min(themat, na.rm=TRUE), max(themat, na.rm=TRUE)), col=rg, xlab="", ylab="", main="", xaxt="n", yaxt="n")
-        box()
+        #image(1:nrow(themat), 1:ncol(themat), mirror(themat), zlim=c(-1,1), col=rg, xlab="", ylab="", main="", xaxt="n", yaxt="n")
+        image(1:nrow(themat), 1:ncol(themat), mirror(themat), zlim=c(min(themat, na.rm=TRUE), max(themat, na.rm=TRUE)), col=rg, xlab="", ylab="", main="", xaxt="n", yaxt="n")
+        #box()
       }
     }
   }
@@ -294,21 +361,22 @@ setMethod(
   f = "bgraph",
   signature = "beam",
   definition = function(object){
-    df <- object@table
-    if('m_cor' %in% colnames(df)){
-      p <- object@dimX[2]
-      idxs <- .upperTriIdxs(p)
-      edges <- as.data.frame(idxs)
-      edges <- cbind(edges, abs(df$m_cor))
-      colnames(edges) <- c('node1','node2','weight')
-      myigraph <- igraph::graph_from_data_frame(d=edges, directed=FALSE)
-      if(length(object@varlabs)>0){
-        myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
-      }
-      return(myigraph)
-    }else{
-      stop('Method not available: check arguments return.only and type in calling function beam')
+
+    # Check input
+    assert_that('m_cor' %in% colnames(object@table), msg="'m_cor' not available in input beam object")
+    
+    # Get bidirected graph
+    p <- object@dimX[2]
+    idxs <- .upperTriIdxs(p)
+    edges <- as.data.frame(idxs)
+    edges <- cbind(edges, abs(object@table[,"m_cor"]))
+    colnames(edges) <- c('node1','node2','weight')
+    myigraph <- igraph::graph_from_data_frame(d=edges, directed=FALSE)
+    if(length(object@varlabs)>0){
+      myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
     }
+    
+    return(myigraph)
   }
 )
 
@@ -318,21 +386,22 @@ setMethod(
   f = "ugraph",
   signature = "beam",
   definition = function(object){
-    df <- object@table
-    if('p_cor' %in% colnames(df)){
-      p <- object@dimX[2]
-      idxs <- .upperTriIdxs(p)
-      edges <- as.data.frame(idxs)
-      edges <- cbind(edges, abs(df$p_cor))
-      colnames(edges) <- c('node1','node2','weight')
-      myigraph <- igraph::graph_from_data_frame(d=edges, directed=FALSE)
-      if(length(object@varlabs)>0){
-        myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
-      }
-      return(myigraph)
-    }else{
-      stop('Method not available: check arguments return.only and type in calling function beam')
+
+    # Check input
+    assert_that('p_cor' %in% colnames(object@table), msg="'p_cor' not available in input beam object")
+    
+    # Get undirected graph
+    p <- object@dimX[2]
+    idxs <- .upperTriIdxs(p)
+    edges <- as.data.frame(idxs)
+    edges <- cbind(edges, abs(object@table[,"p_cor"]))
+    colnames(edges) <- c('node1','node2','weight')
+    myigraph <- igraph::graph_from_data_frame(d=edges, directed=FALSE)
+    if(length(object@varlabs)>0){
+      myigraph <- igraph::set.vertex.attribute(myigraph, "name", value=object@varlabs)
     }
+    
+    return(myigraph)
 
   }
 )

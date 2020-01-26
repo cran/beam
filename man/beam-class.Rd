@@ -8,11 +8,22 @@
 \alias{cond,beam-method}
 \alias{mcor,beam-method}
 \alias{pcor,beam-method}
+\alias{postExpSigma,beam-method}
+\alias{postExpOmega,beam-method}
 \alias{plotCor,beam-method}
 \alias{plotML,beam-method}
 \alias{bgraph,beam-method}
 \alias{ugraph,beam-method}
+\alias{marg}
+\alias{cond}
+\alias{mcor}
+\alias{pcor}
+\alias{plotML}
+\alias{bgraph}
+\alias{ugraph}
 \alias{plotCor}
+\alias{postExpSigma}
+\alias{postExpOmega}
 
 \title{Class beam}
 
@@ -30,6 +41,10 @@
   \S4method{mcor}{beam}(object)
 
   \S4method{pcor}{beam}(object)
+  
+  \S4method{postExpSigma}{beam}(object, vars.method="eb")
+  
+  \S4method{postExpOmega}{beam}(object, vars.method="eb")
 
   \S4method{plotML}{beam}(object, ...)
 
@@ -50,6 +65,8 @@
   \item{order}{character. Either 'original' or 'clust'. If 'clust' the rows and columns of the correlation matrix are reordered using the cluster memberships obtained by the Louvain clustering algorithm.}
 
   \item{by}{character. When type ="both" and order = 'clust', specifies whether the clustering has to be performed using the complete weighted marginal or conditional independence graph.}
+
+  \item{vars.method}{character. Method of shrinkage estimation for the variances. }
 
   \item{...}{further arguments passed to or from other methods.}
   
@@ -80,6 +97,10 @@ An S4 class representing the output of the \code{\link{beam}} function.
   \item{\code{return.only}}{character. Input argument.}
 
   \item{\code{time}}{numeric. Running time (in seconds).}
+  
+  \item{\code{TinvStdev}}{numeric. Square root of partial variances.}
+  
+  \item{\code{s}}{numeric. Sample variances.}
 }
 }
 
