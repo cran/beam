@@ -1,7 +1,7 @@
 Package: beam
 Type: Package
 Title: Fast Bayesian Inference in Large Gaussian Graphical Models
-Version: 2.0.0
+Version: 2.0.1
 Date: 2020-01-16
 Author: Gwenael G.R. Leday [cre, aut],
   Ilaria Speranza [aut],
@@ -17,9 +17,9 @@ License: GPL (>= 2.0)
 LazyData: TRUE
 NeedsCompilation: yes
 Repository: CRAN
-Packaged: 2020-01-16 11:09:50 UTC; leday001
+Packaged: 2020-01-28 08:59:50 UTC; leday001
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo, BH
 Suggests: covr, testthat
 URL: https://github.com/gleday/beam
-Date/Publication: 2020-01-26 22:10:02 UTC
+Date/Publication: 2020-01-28 09:40:20 UTC

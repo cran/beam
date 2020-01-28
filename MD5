@@ -1,6 +1,6 @@
-7bdf40f5c6d0fe4fce033717894864bd *DESCRIPTION
+5245174a9545f81ab11b9ed41075d1df *DESCRIPTION
 4787a91a23d636b7bed746e60035c20f *NAMESPACE
-3c545896e9c9cf83e0d8fce389255eb1 *NEWS.md
+29b8bfe41bb05c6bf28cc4f033926b98 *NEWS.md
 f385b7a8eb40851e9a537af22ff0a7c8 *R/AllClasses.r
 6395f9680069a697d5e5851ad30266c9 *R/AllGenerics.r
 17c9f481a481fa5c2f8c6cf1ebe3483f *R/RcppExports.R
@@ -22,7 +22,7 @@ a3887fc5ef6fde1ed5c87e017d83dd92 *man/lightbeam.Rd
 21559176d9b2f736ae38841f97f0ee21 *src/Makevars
 a6d21086332ce1812e3ae78d64913402 *src/Makevars.win
 a05cbd691da050658d90649fd2f11caa *src/RcppExports.cpp
-56bfabb46727dbe38f6910baf4c4a37a *src/beam.cpp
+bb15a127524b75c735616a27af6ffdff *src/beam.cpp
 578bca313126b855f3193403fcde9a16 *tests/testthat.r
 58c4336d04df962df46fc554b8482e61 *tests/testthat/test_beam.r
 416478cbeb3c5d1398cc9cfc6ce38686 *tests/testthat/test_lightbeam.r

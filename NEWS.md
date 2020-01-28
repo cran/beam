@@ -22,3 +22,6 @@ This file lists changes in the R package for each release.
 
 * paper citations have been updated
 
+## beam 2.0.1
+
+* Small bugs fixed in c++ code
